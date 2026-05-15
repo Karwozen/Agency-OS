@@ -18,7 +18,7 @@ async function startServer() {
         return res.status(400).json({ error: 'Prompt is required' });
       }
 
-      const apiKey = "AIzaSyDtva8auU5umEbhQIGOEGa_0l_JiZlZiQc"; // TODO: Revert to process.env.GEMINI_API_KEY before export
+      const apiKey = process.env.GEMINI_API_KEY; 
       if (!apiKey) {
         return res.status(500).json({ error: 'GEMINI_API_KEY is not configured.' });
       }
@@ -127,9 +127,9 @@ O objetivo final não é apenas código, é uma **direção de arte inabalável*
         res.write(chunk.text);
       }
       res.end();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in /api/generate:', error);
-      res.status(500).json({ error: 'Internal server error while generating content.' });
+      res.status(500).json({ error: 'Internal server error while generating content.', details: error.message });
     }
   });
 

@@ -127,6 +127,8 @@ Observações de Imersão: ${data.immersionCustom}
 
 Micro-interações: ${MICROINTERACTION_OPTIONS.find(o => o.id === data.microinteractions)?.title || ""}
 Observações de Micro-interações: ${data.microinteractionsCustom}
+
+IMPORTANTE: Eu já validei todas as etapas no sistema visual e este é o meu OK final. Por favor, NÃO faça perguntas adicionais, NÃO faça resumos e NÃO peça confirmação. Gere DIRETAMENTE e na íntegra os 5 arquivos Markdown exigidos nas regras do System Instruction agora mesmo.
       `.trim();
 
       const response = await fetch("/api/generate", {
@@ -136,14 +138,15 @@ Observações de Micro-interações: ${data.microinteractionsCustom}
       });
 
       if (!response.ok) {
-        throw new Error("Failed to generate content");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.details || "Failed to generate content");
       }
       
       const text = await response.text();
       setResult(text);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("Houve um erro ao gerar a arquitetura. Veja a console.");
+      alert("Houve um erro ao gerar a arquitetura: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -528,19 +531,28 @@ Observações de Micro-interações: ${data.microinteractionsCustom}
                     </div>
                     <h2 className="text-2xl font-medium">Briefing Concluído</h2>
                     <p className="text-white/50 text-sm max-w-xs mx-auto mb-8">
-                      Todos os parâmetros foram ajustados. O motor IA está pronto para arquitetar o projeto.
+                      Todos os parâmetros foram ajustados. Revise suas escolhas ou dê o OK final para gerar a arquitetura.
                     </p>
-                    <Button 
-                      onClick={generateArchitecture} 
-                      disabled={loading}
-                      className="w-full sm:w-auto min-w-[240px] h-12 text-base font-medium"
-                    >
-                      {loading ? (
-                        <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando Arquitetura...</>
-                      ) : (
-                        "Gerar Arquitetura Premium"
-                      )}
-                    </Button>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                      <Button
+                        onClick={handlePrev}
+                        disabled={loading}
+                        className="w-full sm:w-auto min-w-[140px] h-12 text-base font-medium bg-transparent border border-white/20 text-white hover:bg-white/10"
+                      >
+                        <ArrowLeft className="w-4 h-4 mr-2" /> Voltar
+                      </Button>
+                      <Button 
+                        onClick={generateArchitecture} 
+                        disabled={loading}
+                        className="w-full sm:w-auto min-w-[240px] h-12 text-base font-medium bg-white text-black hover:bg-white/90"
+                      >
+                        {loading ? (
+                          <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Gerando Arquivos...</>
+                        ) : (
+                          "Dar OK e Gerar Arquivos"
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 )}
               </motion.div>
