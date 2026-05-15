@@ -18,7 +18,7 @@ async function startServer() {
         return res.status(400).json({ error: 'Prompt is required' });
       }
 
-      const apiKey = process.env.GEMINI_API_KEY; 
+      const apiKey = "AIzaSyBEPYpCjUXpwYl-TEsHSDgzhGSJS2Gmcys"; // TODO: Mudar para process.env.GEMINI_API_KEY ao exportar
       if (!apiKey) {
         return res.status(500).json({ error: 'GEMINI_API_KEY is not configured.' });
       }

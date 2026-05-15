@@ -6,7 +6,7 @@ import { Card } from "./components/ui/card";
 import { Input } from "./components/ui/input";
 import { Textarea } from "./components/ui/textarea";
 import { Progress } from "./components/ui/progress";
-import { ArrowRight, ArrowLeft, Check, Copy, UploadCloud, Loader2 } from "lucide-react";
+import { ArrowRight, ArrowLeft, Check, Copy, UploadCloud, Loader2, Download } from "lucide-react";
 
 type WizardData = {
   projectType: string;
@@ -158,6 +158,18 @@ IMPORTANTE: Eu já validei todas as etapas no sistema visual e este é o meu OK 
     setTimeout(() => setCopiedIndex(null), 2000);
   };
 
+  const handleDownload = (content: string, filename: string) => {
+    const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   // Funcao para renderizar markdown e criar botoes de copia se possivel
   const renderResult = () => {
     if (!result) return null;
@@ -171,10 +183,12 @@ IMPORTANTE: Eu já validei todas as etapas no sistema visual e este é o meu OK 
 
     while ((match = blockRegex.exec(result)) !== null) {
       // Texto antes do bloco
+      let textBefore = "";
       if (match.index > lastIndex) {
+        textBefore = result.slice(lastIndex, match.index);
         parts.push(
           <div key={`text-${lastIndex}`} className="markdown-body text-white/80 mb-6 px-2">
-            <Markdown>{result.slice(lastIndex, match.index)}</Markdown>
+            <Markdown>{textBefore}</Markdown>
           </div>
         );
       }
@@ -183,20 +197,34 @@ IMPORTANTE: Eu já validei todas as etapas no sistema visual e este é o meu OK 
       const code = match[2];
       const currentIndex = blockCount++;
       
+      let extractedFilename = `arquivo-${currentIndex + 1}.md`;
+      const filenameMatch = /([a-zA-Z0-9_\-]+\.md)/.exec(textBefore);
+      if (filenameMatch) {
+         extractedFilename = filenameMatch[1];
+      }
+      
       parts.push(
         <div key={`code-${currentIndex}`} className="relative mb-8 group rounded-xl overflow-hidden border border-white/10 bg-[#141414]">
           <div className="flex items-center justify-between px-4 py-2 border-b border-white/5 bg-black/40">
-            <span className="text-xs font-mono text-white/50 uppercase">{lang || "markdown"}</span>
-            <button
-              onClick={() => handleCopy(code, currentIndex)}
-              className="text-white/50 hover:text-white transition-colors flex items-center gap-1.5 text-xs font-medium"
-            >
-              {copiedIndex === currentIndex ? (
-                <><Check className="w-3.5 h-3.5 text-green-400" /> Copied</>
-              ) : (
-                <><Copy className="w-3.5 h-3.5" /> Copy</>
-              )}
-            </button>
+            <span className="text-xs font-mono text-white/50 uppercase">{lang || "markdown"} &bull; {extractedFilename}</span>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => handleDownload(code, extractedFilename)}
+                className="text-white/50 hover:text-white transition-colors flex items-center gap-1.5 text-xs font-medium"
+              >
+                <Download className="w-3.5 h-3.5" /> Salvar
+              </button>
+              <button
+                onClick={() => handleCopy(code, currentIndex)}
+                className="text-white/50 hover:text-white transition-colors flex items-center gap-1.5 text-xs font-medium"
+              >
+                {copiedIndex === currentIndex ? (
+                  <><Check className="w-3.5 h-3.5 text-green-400" /> Copied</>
+                ) : (
+                  <><Copy className="w-3.5 h-3.5" /> Copy</>
+                )}
+              </button>
+            </div>
           </div>
           <div className="p-4 overflow-x-auto text-sm font-mono text-white/90 leading-relaxed whitespace-pre">
             {code}
